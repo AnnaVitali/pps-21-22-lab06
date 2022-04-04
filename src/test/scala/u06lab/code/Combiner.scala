@@ -1,9 +1,11 @@
 package u06lab.code
 
+import u06lab.solution.*
 import org.junit.Test
 import org.junit.Assert.*
 
 class CombinerTests {
+
   @Test
   def testFunctions() = {
     val f: Functions = FunctionsImpl
