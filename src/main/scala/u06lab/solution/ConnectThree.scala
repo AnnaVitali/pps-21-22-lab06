@@ -1,5 +1,7 @@
 package u06lab.solution
 
+import u06lab.solution.ConnectThree.bound
+
 import java.util.OptionalInt
 
 object ConnectThree extends App:
@@ -26,11 +28,23 @@ object ConnectThree extends App:
 
   import Player.*
 
-  def find(board: Board, x: Int, y: Int): Option[Player] = ???
+  def find(board: Board, x: Int, y: Int): Option[Player] =
+    val diskOnBoard: Option[Disk] = board.view.find(d => d.x == x && d.y == y)
+    if diskOnBoard.isEmpty then None else Some(diskOnBoard.get.player)
 
-  def firstAvailableRow(board: Board, x: Int): Option[Int] = ???
+  def firstAvailableRow(board: Board, x: Int): Option[Int] =
+    val rowUnavailable: Seq[Int] = board.view.filter(d => d.x == x).map(d => d.y).toSeq
+    if rowUnavailable.containsSlice(0 to 3) then None else Some(rowUnavailable.foldLeft(0)((acc, elem) => if elem == acc then acc + 1 else acc))
 
-  def placeAnyDisk(board: Board, player: Player): Seq[Board] = ???
+//non funziona
+  def placeAnyDisk(board: Board, player: Player): Seq[Board] =
+    def _placeAnyDisk(result: Seq[Board], x: Int, y: Int): Seq[Board] =
+      x match
+        case 3 => if find(board, x, y).isEmpty then result :+ (board :+ (Disk(x,y, player))) else _placeAnyDisk(result, 0, firstAvailableRow(board, 0).get)
+        case _  => if find(board, x, y).isEmpty then _placeAnyDisk(result :+ (board :+ (Disk(x,y, player))), x + 1, y) else _placeAnyDisk(result :+ (board :+ (Disk(x,firstAvailableRow(board, x).get, player))), x + 1, y)
+    _placeAnyDisk(Seq(), 0, 0)
+
+
 
   def computeAnyGame(player: Player, moves: Int): LazyList[Game] = ???
 
@@ -69,12 +83,12 @@ object ConnectThree extends App:
   // .... .... .... ....
   // ...X .... .... ....
   // ...O ..XO .X.O X..O
-  println("EX 3: ")
-// Exercise 3 (ADVANCED!): implement computeAnyGame such that..
-  computeAnyGame(O, 4).foreach { g =>
-    printBoards(g)
-    println()
-  }
+//  println("EX 3: ")
+//// Exercise 3 (ADVANCED!): implement computeAnyGame such that..
+//  computeAnyGame(O, 4).foreach { g =>
+//    printBoards(g)
+//    println()
+//  }
 //  .... .... .... .... ...O
 //  .... .... .... ...X ...X
 //  .... .... ...O ...O ...O
