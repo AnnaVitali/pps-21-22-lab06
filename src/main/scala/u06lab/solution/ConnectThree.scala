@@ -36,17 +36,27 @@ object ConnectThree extends App:
     val rowUnavailable: Seq[Int] = board.view.filter(d => d.x == x).map(d => d.y).toSeq
     if rowUnavailable.containsSlice(0 to 3) then None else Some(rowUnavailable.foldLeft(0)((acc, elem) => if elem == acc then acc + 1 else acc))
 
-//non funziona
+
   def placeAnyDisk(board: Board, player: Player): Seq[Board] =
-    def _placeAnyDisk(result: Seq[Board], x: Int, y: Int): Seq[Board] =
-      x match
-        case 3 => if find(board, x, y).isEmpty then result :+ (board :+ (Disk(x,y, player))) else _placeAnyDisk(result, 0, firstAvailableRow(board, 0).get)
-        case _  => if find(board, x, y).isEmpty then _placeAnyDisk(result :+ (board :+ (Disk(x,y, player))), x + 1, y) else _placeAnyDisk(result :+ (board :+ (Disk(x,firstAvailableRow(board, x).get, player))), x + 1, y)
-    _placeAnyDisk(Seq(), 0, 0)
+    var result: Seq[Board] = Seq()
+    for x <- 0 to bound do
+      val y = firstAvailableRow(board, x)
+      if !y.isEmpty then result = result :+ (board :+ Disk(x, y.get, player))
+    result
+
+  def computeAnyGame(player: Player, moves: Int): LazyList[Game] =
+    moves match
+      case 0 => LazyList(Seq(Nil))
+      case _ =>
+        for
+          games <- computeAnyGame(if player == Player.X then Player.O else Player.X, moves - 1)
+          board <- placeAnyDisk(games.head, player)
+        yield
+          board +: games
 
 
 
-  def computeAnyGame(player: Player, moves: Int): LazyList[Game] = ???
+
 
   def printBoards(game: Seq[Board]): Unit =
     for
@@ -81,14 +91,14 @@ object ConnectThree extends App:
   printBoards(placeAnyDisk(List(Disk(0, 0, O)), X))
   // .... .... .... ....
   // .... .... .... ....
-  // ...X .... .... ....
-  // ...O ..XO .X.O X..O
-//  println("EX 3: ")
-//// Exercise 3 (ADVANCED!): implement computeAnyGame such that..
-//  computeAnyGame(O, 4).foreach { g =>
-//    printBoards(g)
-//    println()
-//  }
+  // .... .... .... X...
+  // O..X O.X. OX.. O...
+  println("EX 3: ")
+// Exercise 3 (ADVANCED!): implement computeAnyGame such that..
+  computeAnyGame(O, 4).foreach { g =>
+    printBoards(g)
+    println()
+  }
 //  .... .... .... .... ...O
 //  .... .... .... ...X ...X
 //  .... .... ...O ...O ...O
